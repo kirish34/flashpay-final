@@ -68,46 +68,62 @@
     <button onclick="registerSacco()">Add SACCO</button>
   </div>
 
-  <script>
-    async function registerMatatu() {
-      const data = {
-        owner: document.getElementById('ownerName').value,
-        contact: document.getElementById('ownerContact').value,
-        vehicleType: document.getElementById('vehicleType').value,
-        plate: document.getElementById('plate').value,
-        tlb: document.getElementById('tlb').value,
-        till: document.getElementById('matatuTill').value,
-        reg: document.getElementById('plate').value,
-        sacco: "" // Optional, can link later
-      };
+<script>
+  async function registerMatatu() {
+    const data = {
+      owner: document.getElementById('ownerName').value,
+      contact: document.getElementById('ownerContact').value,
+      vehicleType: document.getElementById('vehicleType').value,
+      plate: document.getElementById('plate').value,
+      tlb: document.getElementById('tlb').value,
+      till: document.getElementById('matatuTill').value,
+      reg: document.getElementById('plate').value,
+      sacco: ''
+    };
 
-      const res = await fetch('/admin/register-matatu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+    const res = await fetch('/admin/register-matatu', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
 
-      const result = await res.json();
-      alert(result.success ? '✅ Matatu registered successfully!' : `❌ Error: ${result.message}`);
+    const result = await res.json();
+    alert(result.success ? '✅ Matatu registered!' : `❌ ${result.message}`);
+    if (result.success) {
+      // Clear inputs
+      document.getElementById('ownerName').value = '';
+      document.getElementById('ownerContact').value = '';
+      document.getElementById('vehicleType').value = '';
+      document.getElementById('plate').value = '';
+      document.getElementById('tlb').value = '';
+      document.getElementById('matatuTill').value = '';
     }
+  }
 
-    async function registerSacco() {
-      const data = {
-        name: document.getElementById('saccoName').value,
-        contact: document.getElementById('saccoContact').value,
-        till: document.getElementById('saccoTill').value,
-        contractForm: document.getElementById('contractForm').value
-      };
+  async function registerSacco() {
+    const data = {
+      name: document.getElementById('saccoName').value,
+      contact: document.getElementById('saccoContact').value,
+      till: document.getElementById('saccoTill').value,
+      contractForm: document.getElementById('contractForm').value
+    };
 
-      const res = await fetch('/admin/register-sacco', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+    const res = await fetch('/admin/register-sacco', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
 
-      const result = await res.json();
-      alert(result.success ? '✅ SACCO registered successfully!' : `❌ Error: ${result.message}`);
+    const result = await res.json();
+    alert(result.success ? '✅ SACCO registered!' : `❌ ${result.message}`);
+    if (result.success) {
+      // Clear inputs
+      document.getElementById('saccoName').value = '';
+      document.getElementById('saccoContact').value = '';
+      document.getElementById('saccoTill').value = '';
+      document.getElementById('contractForm').value = '';
     }
-  </script>
+  }
+</script>
 </body>
 </html>
