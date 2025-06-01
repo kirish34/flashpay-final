@@ -55,6 +55,12 @@
     <input placeholder="Number Plate (e.g. KCG 123Z)" id="plate" />
     <input placeholder="TLB Number" id="tlb" />
     <input placeholder="Till Number" id="matatuTill" />
+
+    <!-- 🔽 SACCO Dropdown -->
+    <select id="matatuSacco">
+      <option value="">-- Select SACCO --</option>
+    </select>
+
     <button onclick="registerMatatu()">Add Matatu</button>
   </div>
 
@@ -69,6 +75,20 @@
   </div>
 
 <script>
+  // 🔽 Load SACCOs on page load
+  async function loadSaccos() {
+    const res = await fetch('/admin/saccos');
+    const saccos = await res.json();
+    const select = document.getElementById('matatuSacco');
+    select.innerHTML = '<option value="">-- Select SACCO --</option>';
+    saccos.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.name;
+      opt.textContent = s.name;
+      select.appendChild(opt);
+    });
+  }
+
   async function registerMatatu() {
     const data = {
       owner: document.getElementById('ownerName').value,
@@ -78,7 +98,7 @@
       tlb: document.getElementById('tlb').value,
       till: document.getElementById('matatuTill').value,
       reg: document.getElementById('plate').value,
-      sacco: ''
+      sacco: document.getElementById('matatuSacco').value
     };
 
     const res = await fetch('/admin/register-matatu', {
@@ -90,13 +110,13 @@
     const result = await res.json();
     alert(result.success ? '✅ Matatu registered!' : `❌ ${result.message}`);
     if (result.success) {
-      // Clear inputs
       document.getElementById('ownerName').value = '';
       document.getElementById('ownerContact').value = '';
       document.getElementById('vehicleType').value = '';
       document.getElementById('plate').value = '';
       document.getElementById('tlb').value = '';
       document.getElementById('matatuTill').value = '';
+      document.getElementById('matatuSacco').value = '';
     }
   }
 
@@ -117,13 +137,16 @@
     const result = await res.json();
     alert(result.success ? '✅ SACCO registered!' : `❌ ${result.message}`);
     if (result.success) {
-      // Clear inputs
       document.getElementById('saccoName').value = '';
       document.getElementById('saccoContact').value = '';
       document.getElementById('saccoTill').value = '';
       document.getElementById('contractForm').value = '';
+      await loadSaccos(); // 🔁 refresh dropdown
     }
   }
+
+  // Load SACCOs when page opens
+  window.onload = loadSaccos;
 </script>
 </body>
 </html>
