@@ -1,7 +1,4 @@
-// routes/dashboard.js
-
 const path = require('path');
-
 module.exports = function (app) {
   // Redirect base URL to /login
   app.get('/', (_, res) => {
