@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FlashPay POS – Cashier Input</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+    h2 {
+      color: #222;
+    }
+    input, button, select {
+      padding: 10px;
+      margin-top: 10px;
+      margin-right: 10px;
+      font-size: 16px;
+    }
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>FlashPay POS – Enter Amount</h2>
+
+  <select id="cashierDropdown"></select>
+  <input type="number" id="amount" placeholder="Amount (KES)" />
+  <button onclick="sendAmount()">Save</button>
+
+  <div id="message"></div>
+
+  <script>
+    async function loadCashiers() {
+      const res = await fetch('/admin/cashiers');
+      const list = await res.json();
+      const dropdown = document.getElementById('cashierDropdown');
+      dropdown.innerHTML = list.map((c, i) =>
+        `<option value="${i}">${c.branchName} – Cashier ${c.cashierId} (${c.ussdCode})</option>`
+      ).join('');
+    }
+
+    async function sendAmount() {
+      const index = document.getElementById('cashierDropdown').value;
+      const amount = document.getElementById('amount').value;
+
+      if (!amount) return alert("Enter amount");
+
+      const res = await fetch('/flashpay/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cashierIndex: index, amount })
+      });
+
+      const data = await res.json();
+      const msg = data.success
+        ? `✅ Saved! Ask customer to dial ${data.ussdCode}`
+        : `❌ ${data.message}`;
+      document.getElementById('message').innerText = msg;
+    }
+
+    loadCashiers();
+  </script>
+</body>
+</html>

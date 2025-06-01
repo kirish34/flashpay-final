@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Super Admin – FlashPay</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      color: #1a73e8;
+    }
+    .section {
+      background: #fff;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px 5px 0 0;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0d5ed6;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    th {
+      background-color: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h2>Super Admin – Manage Branches</h2>
+
+  <div class="section">
+    <h3>Add Branch</h3>
+    <input type="text" id="branchName" placeholder="Branch Name" />
+    <input type="text" id="tillNumber" placeholder="Till Number" />
+    <button onclick="addBranch()">Add</button>
+  </div>
+
+  <div class="section">
+    <h3>All Branches</h3>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Till</th><th>Edit</th><th>Delete</th></tr>
+      </thead>
+      <tbody id="branchTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadBranches() {
+      const res = await fetch('/admin/branches');
+      const branches = await res.json();
+      const tbody = document.getElementById('branchTable');
+      tbody.innerHTML = '';
+      branches.forEach((b, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input value="${b.name}" onchange="edit(${i}, 'name', this.value)" /></td>
+            <td><input value="${b.till}" onchange="edit(${i}, 'till', this.value)" /></td>
+            <td><button onclick="edit(${i}, null, null)">Save</button></td>
+            <td><button onclick="del(${i})">Delete</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    async function addBranch() {
+      const name = document.getElementById('branchName').value;
+      const till = document.getElementById('tillNumber').value;
+      await fetch('/admin/branches/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, till })
+      });
+      loadBranches();
+    }
+
+    async function edit(index, field, value) {
+      if (!field) return; // prevent empty save clicks
+      await fetch('/admin/branches/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index, field, value })
+      });
+      loadBranches();
+    }
+
+    async function del(index) {
+      await fetch('/admin/branches/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index })
+      });
+      loadBranches();
+    }
+
+    loadBranches();
+  </script>
+</body>
+</html>

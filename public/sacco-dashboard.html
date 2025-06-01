@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SACCO Dashboard – TekeTeke</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      color: #1a73e8;
+      margin-bottom: 20px;
+    }
+    .section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    th {
+      background-color: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h2>SACCO Dashboard</h2>
+
+  <div class="section">
+    <h3>Daily Fee Collection Summary</h3>
+    <div id="summary"></div>
+  </div>
+
+  <div class="section">
+    <h3>Today's Paid Matatus</h3>
+    <table>
+      <thead><tr><th>Matatu</th><th>Amount</th></tr></thead>
+      <tbody id="paidTable"></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>All Matatu Payments</h3>
+    <table>
+      <thead><tr><th>Matatu</th><th>Amount</th><th>Date</th></tr></thead>
+      <tbody id="allTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadSummary() {
+      const res = await fetch('/teketeke/summary');
+      const data = await res.json();
+
+      document.getElementById('summary').innerHTML =
+        `<p>Total Collected Today: <b>KES ${data.total}</b></p>
+         <p>Matatus Paid: <b>${data.count}</b></p>`;
+
+      const paid = Object.entries(data.byMatatu || {});
+      document.getElementById('paidTable').innerHTML = paid.map(([m, amt]) =>
+        `<tr><td>${m}</td><td>KES ${amt}</td></tr>`
+      ).join('');
+    }
+
+    async function loadAllPayments() {
+      const res = await fetch('/teketeke/payments');
+      const all = await res.json();
+      document.getElementById('allTable').innerHTML = all.map(tx =>
+        `<tr><td>${tx.matatu}</td><td>${tx.amount}</td><td>${new Date(tx.date).toLocaleString()}</td></tr>`
+      ).join('');
+    }
+
+    loadSummary();
+    loadAllPayments();
+  </script>
+</body>
+</html>

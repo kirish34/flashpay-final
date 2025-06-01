@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cashier Manager – FlashPay</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      color: #1a73e8;
+      margin-bottom: 20px;
+    }
+    .section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    select, input, button {
+      padding: 10px;
+      font-size: 15px;
+      margin: 10px 5px 0 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0d5ed6;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h2>Cashier Manager – Assign USSD</h2>
+
+  <div class="section">
+    <select id="branchName"></select>
+    <input type="number" id="cashierId" placeholder="Cashier ID (e.g. 1)" />
+    <button onclick="addCashier()">Add Cashier</button>
+  </div>
+
+  <div class="section">
+    <h3>Registered Cashiers</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Branch</th>
+          <th>Cashier ID</th>
+          <th>USSD Code</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="cashierTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadBranches() {
+      const res = await fetch('/admin/branches');
+      const branches = await res.json();
+      const select = document.getElementById('branchName');
+      select.innerHTML = branches.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+    }
+
+    async function loadCashiers() {
+      const res = await fetch('/admin/cashiers');
+      const cashiers = await res.json();
+      const table = document.getElementById('cashierTable');
+      table.innerHTML = cashiers.map((c, i) => `
+        <tr>
+          <td>${c.branchName}</td>
+          <td>${c.cashierId}</td>
+          <td><b>${c.ussdCode}</b></td>
+          <td>${c.status}</td>
+          <td><button onclick="deleteCashier(${i})">Delete</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function addCashier() {
+      const branchName = document.getElementById('branchName').value;
+      const cashierId = document.getElementById('cashierId').value;
+      const res = await fetch('/admin/cashiers/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ branchName, cashierId })
+      });
+      const data = await res.json();
+      alert(data.success ? `✅ USSD: ${data.cashier.ussdCode}` : 'Error');
+      loadCashiers();
+    }
+
+    async function deleteCashier(index) {
+      await fetch('/admin/cashiers/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index })
+      });
+      loadCashiers();
+    }
+
+    loadBranches();
+    loadCashiers();
+  </script>
+</body>
+</html>

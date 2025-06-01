@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Branch Manager – FlashPay</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      color: #1a73e8;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    th {
+      background-color: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h2>Branch Dashboard – TX Monitoring</h2>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>USSD Code</th>
+          <th>Amount</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th>Till</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="txTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadTX() {
+      const res = await fetch('/flashpay/active');
+      const txs = await res.json();
+
+      const table = document.getElementById('txTable');
+      table.innerHTML = txs.map(tx => `
+        <tr>
+          <td>${tx.code}</td>
+          <td>KES ${tx.amount}</td>
+          <td>${tx.phone || '-'}</td>
+          <td>${tx.status}</td>
+          <td>${tx.till}</td>
+          <td>${new Date(tx.createdAt).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    setInterval(loadTX, 3000);
+    loadTX();
+  </script>
+</body>
+</html>

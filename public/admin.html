@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard – FlashPay</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      padding: 30px;
+      color: #333;
+    }
+    h1 {
+      color: #1a73e8;
+      margin-bottom: 20px;
+    }
+    .section {
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 10px 5px 0 0;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0d5ed6;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+
+  <div class="section">
+    <h3>Add New User</h3>
+    <input id="username" placeholder="Username" />
+    <input id="password" placeholder="Password" />
+    <select id="role">
+      <option value="sacco">Sacco</option>
+      <option value="matatu">Matatu</option>
+    </select>
+    <button onclick="addUser()">Add</button>
+  </div>
+
+  <div class="section">
+    <h3>All Users</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="userTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadUsers() {
+      const res = await fetch('/admin/users');
+      const users = await res.json();
+      const tbody = document.getElementById('userTable');
+      tbody.innerHTML = '';
+      users.forEach(u => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${u.username}</td>
+            <td>${u.role}</td>
+            <td><button onclick="deleteUser('${u.username}')">Delete</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    async function addUser() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+
+      const res = await fetch('/admin/add-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role }),
+      });
+
+      const data = await res.json();
+      alert(data.message);
+      loadUsers();
+    }
+
+    async function deleteUser(username) {
+      const res = await fetch('/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await res.json();
+      alert(data.message);
+      loadUsers();
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

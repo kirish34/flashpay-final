@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Matatu Dashboard – TekeTeke</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      color: #1a73e8;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    input, button {
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0d5ed6;
+    }
+    #result {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Matatu Dashboard</h2>
+
+  <div class="card">
+    <h3>Daily Payment</h3>
+    <input type="number" id="amount" placeholder="Enter today's payment" />
+    <button onclick="pay()">Pay</button>
+    <div id="result"></div>
+  </div>
+
+  <div class="card">
+    <h3>Loan Status</h3>
+    <div id="loanInfo"></div>
+  </div>
+
+  <script>
+    async function pay() {
+      const amount = document.getElementById('amount').value;
+      const res = await fetch('/teketeke/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      });
+
+      const data = await res.json();
+      document.getElementById('result').innerText = data.success
+        ? '✅ Payment successful'
+        : '❌ ' + data.message;
+    }
+
+    async function loadLoan() {
+      const res = await fetch('/teketeke/loan-status');
+      const loan = await res.json();
+      document.getElementById('loanInfo').innerHTML = `
+        <p>Loan Amount: <b>KES ${loan.total}</b></p>
+        <p>Repayment Plan: <b>${loan.plan}</b></p>
+        <p>Status: <b>${loan.status}</b></p>
+      `;
+    }
+
+    loadLoan();
+  </script>
+</body>
+</html>
