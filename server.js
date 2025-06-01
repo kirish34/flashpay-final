@@ -30,6 +30,7 @@ require('./routes/callback')(app);
 require('./routes/dashboard')(app);
 require('./routes/branches')(app);
 require('./routes/cashiers')(app);
+require('./routes/teketeke-admin')(app);
 
 app.listen(PORT, () => {
   console.log(`🚀 Flash Pay backend running at http://localhost:${PORT}`);

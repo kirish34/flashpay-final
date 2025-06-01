@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TekeTeke Admin Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      color: #1a73e8;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      margin-top: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 8px 5px 0 0;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0d5ed6;
+    }
+  </style>
+</head>
+<body>
+  <h2>TekeTeke Admin Dashboard</h2>
+
+  <!-- 🚐 Register New Matatu -->
+  <div class="card">
+    <h3>Register Matatu</h3>
+    <input placeholder="Owner Name" id="ownerName" />
+    <input placeholder="Contact (Phone or Email)" id="ownerContact" />
+    <select id="vehicleType">
+      <option value="">-- Vehicle Type --</option>
+      <option value="bus">Bus</option>
+      <option value="minibus">Minibus</option>
+      <option value="van">Van</option>
+    </select>
+    <input placeholder="Number Plate (e.g. KCG 123Z)" id="plate" />
+    <input placeholder="TLB Number" id="tlb" />
+    <input placeholder="Till Number" id="matatuTill" />
+    <button onclick="registerMatatu()">Add Matatu</button>
+  </div>
+
+  <!-- 🧾 Register New SACCO -->
+  <div class="card">
+    <h3>Register SACCO</h3>
+    <input placeholder="SACCO Name" id="saccoName" />
+    <input placeholder="Contact (Phone or Email)" id="saccoContact" />
+    <input placeholder="Till Number" id="saccoTill" />
+    <input placeholder="Contract Form (URL or File Name)" id="contractForm" />
+    <button onclick="registerSacco()">Add SACCO</button>
+  </div>
+
+  <script>
+    async function registerMatatu() {
+      const data = {
+        owner: document.getElementById('ownerName').value,
+        contact: document.getElementById('ownerContact').value,
+        vehicleType: document.getElementById('vehicleType').value,
+        plate: document.getElementById('plate').value,
+        tlb: document.getElementById('tlb').value,
+        till: document.getElementById('matatuTill').value,
+        reg: document.getElementById('plate').value,
+        sacco: "" // Optional, can link later
+      };
+
+      const res = await fetch('/admin/register-matatu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      alert(result.success ? '✅ Matatu registered successfully!' : `❌ Error: ${result.message}`);
+    }
+
+    async function registerSacco() {
+      const data = {
+        name: document.getElementById('saccoName').value,
+        contact: document.getElementById('saccoContact').value,
+        till: document.getElementById('saccoTill').value,
+        contractForm: document.getElementById('contractForm').value
+      };
+
+      const res = await fetch('/admin/register-sacco', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      alert(result.success ? '✅ SACCO registered successfully!' : `❌ Error: ${result.message}`);
+    }
+  </script>
+</body>
+</html>

@@ -1,4 +1,11 @@
 [
-  { "reg": "KDD 234A", "sacco": "citylink" },
-  { "reg": "KCL 556B", "sacco": "citylink" }
+  {
+    "reg": "KDD 234A",
+    "sacco": "citylink",
+    "owner": "John Mwaura",
+    "contact": "0712345678",
+    "vehicleType": "minibus",
+    "tlb": "TLB/89012",
+    "till": "987654"
+  }
 ]
