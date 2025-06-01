@@ -35,35 +35,35 @@ module.exports = function (app) {
   });
 
   // 🔹 Register new Matatu
-  app.post('/admin/register-matatu', async (req, res) => {
-    const { owner, contact, vehicleType, plate, tlb, till } = req.body;
+app.post('/admin/register-matatu', async (req, res) => {
+  const { owner, contact, vehicleType, plate, tlb, till, sacco } = req.body;
 
-    if (!owner || !plate || !till) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
-    }
+  if (!owner || !plate || !till) {
+    return res.status(400).json({ success: false, message: 'Missing required fields' });
+  }
 
-    const newMatatu = {
-      owner,
-      contact,
-      vehicleType,
-      plate,
-      reg: plate, // match legacy reg field
-      tlb,
-      till,
-      sacco: '' // empty for now
-    };
+  const newMatatu = {
+    owner,
+    contact,
+    vehicleType,
+    plate,
+    reg: plate,
+    tlb,
+    till,
+    sacco
+  };
 
-    global.matatus.push(newMatatu);
+  global.matatus.push(newMatatu);
 
-    try {
-      await fs.writeJson(matatuFile, global.matatus, { spaces: 2 });
-      console.log('✅ Matatu saved:', newMatatu);
-      res.json({ success: true, message: 'Matatu registered successfully' });
-    } catch (err) {
-      console.error('❌ Failed to save Matatu:', err.message);
-      res.status(500).json({ success: false, message: 'Failed to save Matatu' });
-    }
-  });
+  try {
+    await fs.writeJson(matatuFile, global.matatus, { spaces: 2 });
+    console.log('✅ Matatu saved:', newMatatu);
+    res.json({ success: true, message: 'Matatu registered successfully' });
+  } catch (err) {
+    console.error('❌ Failed to save Matatu:', err.message);
+    res.status(500).json({ success: false, message: 'Failed to save Matatu' });
+  }
+});
 
   // 🔹 View all SACCOs
   app.get('/admin/saccos', (_, res) => {
