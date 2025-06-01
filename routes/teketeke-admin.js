@@ -1,4 +1,4 @@
-const db = require('../firebase');
+const db = require('../firebase'); // ✅ correct path from routes → root
 
 module.exports = function (app) {
   // 🔹 Register new SACCO
