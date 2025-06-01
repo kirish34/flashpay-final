@@ -1,10 +1,11 @@
-// Dashboard file routes// routes/dashboard.js
+// routes/dashboard.js
 
 const path = require('path');
 
 module.exports = function (app) {
+  // Redirect base URL to /login
   app.get('/', (_, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.redirect('/login');
   });
 
   app.get('/login', (_, res) => {
