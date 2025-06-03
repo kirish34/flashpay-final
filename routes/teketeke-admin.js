@@ -1,4 +1,6 @@
-const db = require('../firebase'); // ✅ correct path from routes → root
+// routes/teketeke-admin.js
+
+const db = require('../firebase'); // ✅ Firestore DB instance
 
 module.exports = function (app) {
   // 🔹 Register new SACCO
@@ -9,14 +11,13 @@ module.exports = function (app) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
-    const newSacco = { name, contact, till, contractForm };
-
     try {
-      await db.collection('saccos').add(newSacco);
-      console.log('✅ SACCO saved to Firebase:', newSacco);
+      const docRef = db.collection('saccos').doc(); // Auto-generate ID
+      await docRef.set({ name, contact, till, contractForm });
+      console.log('✅ Firestore SACCO saved:', name);
       res.json({ success: true, message: 'SACCO registered successfully' });
     } catch (err) {
-      console.error('❌ Failed to save SACCO to Firebase:', err.message);
+      console.error('❌ Firestore error saving SACCO:', err.message);
       res.status(500).json({ success: false, message: 'Failed to save SACCO' });
     }
   });
@@ -41,36 +42,34 @@ module.exports = function (app) {
     };
 
     try {
-      await db.collection('matatus').add(newMatatu);
-      console.log('✅ Matatu saved to Firebase:', newMatatu);
+      const docRef = db.collection('matatus').doc(); // Auto-generate ID
+      await docRef.set(newMatatu);
+      console.log('✅ Firestore Matatu saved:', plate);
       res.json({ success: true, message: 'Matatu registered successfully' });
     } catch (err) {
-      console.error('❌ Failed to save Matatu to Firebase:', err.message);
+      console.error('❌ Firestore error saving Matatu:', err.message);
       res.status(500).json({ success: false, message: 'Failed to save Matatu' });
     }
   });
 
-  // 🔹 View all SACCOs
+  // 🔍 Optional GET routes
   app.get('/admin/saccos', async (_, res) => {
     try {
       const snapshot = await db.collection('saccos').get();
-      const saccos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const saccos = snapshot.docs.map(doc => doc.data());
       res.json(saccos);
     } catch (err) {
-      console.error('❌ Error fetching SACCOs:', err.message);
-      res.status(500).json({ success: false, message: 'Failed to fetch saccos' });
+      res.status(500).json({ success: false, message: 'Failed to fetch SACCOs' });
     }
   });
 
-  // 🔹 View all Matatus
   app.get('/admin/matatus', async (_, res) => {
     try {
       const snapshot = await db.collection('matatus').get();
-      const matatus = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const matatus = snapshot.docs.map(doc => doc.data());
       res.json(matatus);
     } catch (err) {
-      console.error('❌ Error fetching Matatus:', err.message);
-      res.status(500).json({ success: false, message: 'Failed to fetch matatus' });
+      res.status(500).json({ success: false, message: 'Failed to fetch Matatus' });
     }
   });
 };
