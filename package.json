@@ -4,7 +4,7 @@
   "description": "Instructions and project overview.",
   "main": "pos-listener.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "start": "node server.js"
   },
   "repository": {
@@ -26,5 +26,6 @@
     "firebase-admin": "^13.4.0",
     "fs-extra": "^11.3.0",
     "uuid": "^11.1.0"
-  }
+  },
+  "devDependencies": {}
 }

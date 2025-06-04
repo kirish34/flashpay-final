@@ -32,6 +32,10 @@ require('./routes/branches')(app);
 require('./routes/cashiers')(app);
 require('./routes/teketeke-admin')(app);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Flash Pay backend running at http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Flash Pay backend running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
