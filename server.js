@@ -15,6 +15,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 // In-memory store
 global.activeBills = {}; // example: { txcode123: { amount, phone, status } }
 
+// TTL cleanup configuration
+const BILL_TTL = parseInt(process.env.ACTIVE_BILL_TTL, 10) || 5 * 60 * 1000; // default 5 minutes
+const { startBillCleanup } = require('./cleanup');
+
+// Periodically remove expired bills
+startBillCleanup(global.activeBills, BILL_TTL);
+
 // Load shared JSON data
 global.users = fs.readJsonSync(path.join(__dirname, 'data/users.json'), { throws: false }) || [];
 global.txCodes = fs.readJsonSync(path.join(__dirname, 'data/txcodes.json'), { throws: false }) || [];

@@ -9,6 +9,12 @@ const PORT = 4000;
 app.use(cors());
 app.use(express.json());
 
+global.activeBills = global.activeBills || {};
+const BILL_TTL = parseInt(process.env.ACTIVE_BILL_TTL, 10) || 5 * 60 * 1000; // default 5 minutes
+const { startBillCleanup } = require('./cleanup');
+
+startBillCleanup(global.activeBills, BILL_TTL);
+
 // Listener route for POS TX injections
 app.post('/newtx', (req, res) => {
   const { amount, phone, tillNumber } = req.body;
