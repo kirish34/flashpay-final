@@ -8,7 +8,8 @@ const usersFile = path.join(__dirname, '../data/users.json');
 module.exports = function (app) {
   // Get all users (branches/cashiers/matatus)
   app.get('/admin/users', (_, res) => {
-    res.json(global.users);
+    const sanitized = global.users.map(u => ({ username: u.username, role: u.role }));
+    res.json(sanitized);
   });
 
   // Add new user
