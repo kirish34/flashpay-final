@@ -1,6 +1,5 @@
 // routes/login.js
 
-const path = require('path');
 
 module.exports = function (app) {
   app.post('/login', (req, res) => {
