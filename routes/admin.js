@@ -2,6 +2,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
+const crypto = require('crypto');
 
 const usersFile = path.join(__dirname, '../data/users.json');
 
@@ -23,7 +24,9 @@ module.exports = function (app) {
       return res.status(409).json({ success: false, message: 'Username already exists' });
     }
 
-    const newUser = { username, password, role };
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hashed = crypto.scryptSync(password, salt, 64).toString('hex');
+    const newUser = { username, password: hashed, salt, role };
     global.users.push(newUser);
     fs.writeJson(usersFile, global.users, { spaces: 2 });
 

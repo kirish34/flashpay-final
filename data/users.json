@@ -1,5 +1,5 @@
 [
-  { "username": "admin", "password": "admin123", "role": "admin" },
-  { "username": "citylink", "password": "1234", "role": "sacco" },
-  { "username": "matatu2345", "password": "5678", "role": "matatu" }
+  { "username": "admin", "password": "0edf86e20715c65753f7391277d8258cfc5c89d8008fc9ad501e3f2fe4b0c8adbab705dcaa13693a23c6a6ff038c7ccecd016fd05a8c483583a307288465f6ae", "salt": "8c0be5c3902d26a13f5db9914d572468", "role": "admin" },
+  { "username": "citylink", "password": "ddda656cb0d84863144875cac1c7aa8988b6306431dcb95244e3a6d25c3252e7ac09ebb120963ae1c8f2d5b74c010e916a5f9f2e1f959871c49fa48a7e179d79", "salt": "8203358a77f9362c9c55a1a522ccdecb", "role": "sacco" },
+  { "username": "matatu2345", "password": "23edf305b62029165f170335403339c34a92118fb9288fc95fbd870287930b860e58c35548f4a32af1dd3528509890e7961ad92845861ab21d60a2f7d5ab4172", "salt": "113217f6576843c882e305bebd658a71", "role": "matatu" }
 ]

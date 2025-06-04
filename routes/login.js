@@ -1,13 +1,21 @@
 // routes/login.js
 
 const path = require('path');
+const crypto = require('crypto');
 
 module.exports = function (app) {
   app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    const user = global.users.find(u => u.username === username && u.password === password);
+    const user = global.users.find(u => u.username === username);
 
-    if (!user) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const hashed = crypto.scryptSync(password, user.salt, 64).toString('hex');
+    if (hashed !== user.password) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
 
     res.json({ success: true, role: user.role, redirect: getRedirect(user.role) });
   });
