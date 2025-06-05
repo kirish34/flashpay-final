@@ -5,9 +5,7 @@ const session = require('express-session');
 const path = require('path');
 const fs = require('fs-extra');
 
-const usersFile = path.join(__dirname, '../data/users.json');
-
-// In-memory or file-based login credentials (admin only)
+// In-memory admin credentials only
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'flashpay123';
 
