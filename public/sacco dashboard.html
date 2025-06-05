@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SACCO Dashboard – TekeTeke</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    h2 {
+      color: #1976d2;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 15px;
+      background: #1976d2;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .tab.active {
+      background: #135ba1;
+    }
+    .panel {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .panel.active {
+      display: block;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #1976d2;
+      color: white;
+    }
+    input, select, button {
+      margin: 5px 5px 5px 0;
+      padding: 8px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .chart-box {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h2>SACCO Dashboard – TekeTeke</h2>
+  <div class="tabs">
+    <div class="tab active" onclick="showPanel('matatus')">Matatus</div>
+    <div class="tab" onclick="showPanel('fees')">Fee Collection</div>
+    <div class="tab" onclick="showPanel('savings')">Savings</div>
+    <div class="tab" onclick="showPanel('loans')">Loans</div>
+    <div class="tab" onclick="showPanel('transactions')">Transactions</div>
+  </div>
+
+  <div id="matatus" class="panel active">
+    <h3>Matatus in SACCO</h3>
+    <select id="matatuDropdown"></select>
+    <input type="text" id="searchMatatu" placeholder="Search Matatu...">
+    <div id="matatuList"></div>
+  </div>
+
+  <div id="fees" class="panel">
+    <h3>Daily Fee Settings</h3>
+    <input type="text" id="matatuId" placeholder="Matatu ID">
+    <input type="text" id="matatuTill" placeholder="Till Number">
+    <select id="vehicleType">
+      <option value="bus">Bus</option>
+      <option value="minibus">Minibus</option>
+      <option value="van">Van</option>
+    </select>
+    <label>Auto Collection:</label>
+    <select id="autoFee">
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+    <input type="time" id="autoTime">
+    <input type="number" id="dailyFeeAmount" placeholder="Daily Fee (KES)">
+    <button onclick="addFeeSettings()">Save</button>
+  </div>
+
+  <div id="savings" class="panel">
+    <h3>Savings Settings</h3>
+    <input type="text" id="savingMatatuId" placeholder="Matatu ID">
+    <input type="text" id="savingMatatuTill" placeholder="Till Number">
+    <input type="number" id="dailySavingAmount" placeholder="Daily Saving Amount (KES)">
+    <label>Auto Savings:</label>
+    <select id="autoSaving">
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+    <input type="time" id="savingAutoTime">
+    <button onclick="addSavingSettings()">Save</button>
+  </div>
+
+  <div id="loans" class="panel">
+    <h3>Loans</h3>
+    <table>
+      <thead><tr><th>Matatu</th><th>Loan Amount</th><th>Plan</th><th>Duration</th></tr></thead>
+      <tbody id="loanList"></tbody>
+    </table>
+  </div>
+
+  <div id="transactions" class="panel">
+    <h3>Transactions</h3>
+    <label>Date:</label>
+    <input type="date" id="dateFilter">
+    <label>Status:</label>
+    <select id="statusFilter">
+      <option value="">All</option>
+      <option value="paid">Paid</option>
+      <option value="initiated">Initiated</option>
+      <option value="pending">Pending</option>
+    </select>
+    <button onclick="exportToCSV()">Export to CSV</button>
+    <table id="deductionsTable">
+      <thead><tr><th>Matatu</th><th>Till</th><th>Amount</th><th>Type</th><th>Time</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="chart-box">
+      <canvas id="feeChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+
+  <script>
+    function showPanel(id) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+    }
+
+    async function addFeeSettings() {
+      const data = {
+        matatuCode: document.getElementById("matatuId").value,
+        tillNumber: document.getElementById("matatuTill").value,
+        type: document.getElementById("vehicleType").value,
+        autoCollect: document.getElementById("autoFee").value === 'yes',
+        autoTime: document.getElementById("autoTime").value,
+        dailyFee: Number(document.getElementById("dailyFeeAmount").value)
+      };
+      await fetch('/api/sacco/add-fee-setting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      alert('✅ Fee setting saved');
+    }
+
+    async function addSavingSettings() {
+      const data = {
+        matatuCode: document.getElementById("savingMatatuId").value,
+        tillNumber: document.getElementById("savingMatatuTill").value,
+        autoCollect: document.getElementById("autoSaving").value === 'yes',
+        autoTime: document.getElementById("savingAutoTime").value,
+        amount: Number(document.getElementById("dailySavingAmount").value)
+      };
+      await fetch('/api/sacco/add-saving-setting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      alert('✅ Saving setting saved');
+    }
+
+    async function loadDeductionsLog() {
+      const res = await fetch('/api/sacco/deductions-log');
+      const data = await res.json();
+      const tbody = document.querySelector("#deductionsTable tbody");
+      const labels = [];
+      const amounts = [];
+      tbody.innerHTML = "";
+
+      data.records.forEach(log => {
+        const row = `
+          <tr>
+            <td>${log.matatuCode}</td>
+            <td>${log.till}</td>
+            <td>${log.amount}</td>
+            <td>${log.type}</td>
+            <td>${new Date(log.timestamp).toLocaleString()}</td>
+          </tr>`;
+        tbody.innerHTML += row;
+        labels.push(new Date(log.timestamp).toLocaleDateString());
+        amounts.push(log.amount);
+      });
+
+      new Chart(document.getElementById('feeChart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Collected Fees Over Time',
+            data: amounts,
+            borderColor: '#1976d2',
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function exportToCSV() {
+      const rows = document.querySelectorAll("#deductionsTable tr");
+      let csv = "";
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("td, th");
+        const rowData = Array.from(cols).map(col => col.innerText);
+        csv += rowData.join(",") + "\n";
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'deductions.csv';
+      link.click();
+    }
+
+    window.onload = loadDeductionsLog;
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flash Pay Supermarket Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #eef3f7;
+    }
+    .logout {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+    .logout button {
+      padding: 8px 16px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .logout button:hover {
+      background: darkred;
+    }
+    /* ... (rest of existing styles remain unchanged) ... */
+  </style>
+</head>
+<body>
+  <div class="logout">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <h2>🏬 Flash Pay - Supermarket Admin Dashboard</h2>
+  <!-- (existing tab UI and content remains unchanged) -->
+
+  <script>
+    async function checkSession() {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json();
+      if (!data.loggedIn) window.location.href = 'login.html';
+    }
+
+    async function logout() {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    }
+
+    checkSession();
+  </script>
+</body>
+</html>

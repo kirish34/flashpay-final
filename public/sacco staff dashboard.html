@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SACCO Staff Dashboard – TekeTeke</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      padding: 20px;
+    }
+    h2 {
+      color: #1976d2;
+    }
+    .filter-bar {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .filter-bar input, .filter-bar select, .filter-bar button {
+      padding: 8px;
+      flex: 1 1 200px;
+      min-width: 150px;
+    }
+    .summary {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #0d47a1;
+      font-weight: bold;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      min-width: 600px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #1976d2;
+      color: white;
+    }
+    .status-paid {
+      color: green;
+    }
+    .status-pending {
+      color: orange;
+    }
+    @media (max-width: 600px) {
+      .filter-bar {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>SACCO Staff Dashboard – TekeTeke</h2>
+  <div class="summary">Total Collected Today: KES <span id="totalAmount">0</span></div>
+
+  <div class="filter-bar">
+    <label for="dateFilter">Date:</label>
+    <input type="date" id="dateFilter">
+    <label for="statusFilter">Status:</label>
+    <select id="statusFilter">
+      <option value="">All</option>
+      <option value="paid">Paid</option>
+      <option value="pending">Pending</option>
+    </select>
+    <input type="text" id="matatuSearch" placeholder="Search Matatu...">
+    <button onclick="applyFilters()">Apply Filters</button>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Matatu</th>
+          <th>Amount (KES)</th>
+          <th>Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="feeTableBody">
+        <!-- Rows will be injected here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function applyFilters() {
+      const date = document.getElementById('dateFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const matatuSearch = document.getElementById('matatuSearch').value.toLowerCase();
+
+      const res = await fetch(`/api/sacco/fee-tracking?date=${date}&status=${status}`);
+      const data = await res.json();
+      const body = document.getElementById('feeTableBody');
+      let total = 0;
+
+      body.innerHTML = '';
+      data.forEach(entry => {
+        if (matatuSearch && !entry.matatu.toLowerCase().includes(matatuSearch)) return;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entry.matatu}</td>
+          <td>${entry.amount}</td>
+          <td>${new Date(entry.timestamp).toLocaleTimeString()}</td>
+          <td class="status-${entry.status}">${entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}</td>
+        `;
+        body.appendChild(row);
+
+        if (entry.status === 'paid') total += Number(entry.amount);
+      });
+
+      document.getElementById('totalAmount').textContent = total;
+    }
+
+    window.onload = applyFilters;
+  </script>
+</body>
+</html>

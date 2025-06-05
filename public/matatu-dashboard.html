@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Matatu Owner Dashboard – TekeTeke</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    h2 {
+      color: #1976d2;
+    }
+    section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (min-width: 600px) {
+      input, select, button {
+        width: auto;
+        margin-right: 10px;
+      }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #1976d2;
+      color: white;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    @media (max-width: 480px) {
+      section {
+        padding: 15px;
+      }
+      h2, h3 {
+        font-size: 18px;
+      }
+      table, th, td {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Matatu Owner Dashboard – TekeTeke</h2>
+
+  <section>
+    <h3>Your Matatus</h3>
+    <select id="matatuSelect"></select>
+  </section>
+
+  <section>
+    <h3>Transactions</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody id="transactionBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h3>Savings</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="savingsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h3>Loan Requests</h3>
+    <input type="number" id="loanAmount" placeholder="Enter Loan Amount (KES)">
+    <select id="loanPlan">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+    <button onclick="requestLoan()">Request Loan</button>
+  </section>
+
+  <script>
+    const matatus = JSON.parse(localStorage.getItem('ownerMatatus') || '[]');
+
+    function populateMatatus() {
+      const dropdown = document.getElementById('matatuSelect');
+      dropdown.innerHTML = '';
+      matatus.forEach(code => {
+        const option = document.createElement('option');
+        option.value = code;
+        option.textContent = code;
+        dropdown.appendChild(option);
+      });
+    }
+
+    async function fetchTransactions(matatuCode) {
+      const res = await fetch(`/api/matatu/transactions/${matatuCode}`);
+      const data = await res.json();
+      const tbody = document.getElementById('transactionBody');
+      tbody.innerHTML = '';
+      data.forEach(item => {
+        const row = `<tr><td>${new Date(item.timestamp).toLocaleString()}</td><td>${item.amount}</td><td>${item.status}</td><td>${item.type}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    async function fetchSavings(matatuCode) {
+      const res = await fetch(`/api/matatu/savings/${matatuCode}`);
+      const data = await res.json();
+      const tbody = document.getElementById('savingsBody');
+      tbody.innerHTML = '';
+      data.forEach(item => {
+        const row = `<tr><td>${new Date(item.timestamp).toLocaleDateString()}</td><td>${item.amount}</td><td>${item.status}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    async function requestLoan() {
+      const matatuCode = document.getElementById('matatuSelect').value;
+      const amount = document.getElementById('loanAmount').value;
+      const plan = document.getElementById('loanPlan').value;
+      if (!matatuCode || !amount) return alert('Please fill in all fields');
+
+      const res = await fetch('/api/matatu/request-loan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matatuCode, amount, plan })
+      });
+
+      const result = await res.json();
+      if (result.success) alert('✅ Loan request submitted.');
+      else alert('❌ Loan request failed.');
+    }
+
+    document.getElementById('matatuSelect').addEventListener('change', e => {
+      fetchTransactions(e.target.value);
+      fetchSavings(e.target.value);
+    });
+
+    populateMatatus();
+    if (matatus.length) {
+      fetchTransactions(matatus[0]);
+      fetchSavings(matatus[0]);
+    }
+  </script>
+
+</body>
+</html>

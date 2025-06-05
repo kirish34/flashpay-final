@@ -1,0 +1,19 @@
+[
+  {
+    "username": "admin",
+    "password": "1234",
+    "role": "admin"
+  },
+  {
+    "username": "citylink",
+    "password": "4567",
+    "role": "sacco",
+    "saccoName": "CityLink"
+  },
+  {
+    "username": "mt1234",
+    "password": "9999",
+    "role": "matatu",
+    "matatuCode": "2345"
+  }
+]

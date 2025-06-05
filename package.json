@@ -1,0 +1,31 @@
+{
+  "name": "flashpay-teketeke-full-final",
+  "version": "1.0.0",
+  "description": "Instructions and project overview.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kirish34/flashpay-final.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kirish34/flashpay-final/issues"
+  },
+  "homepage": "https://github.com/kirish34/flashpay-final#readme",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "firebase-admin": "^13.4.0",
+    "fs-extra": "^11.3.0",
+    "uuid": "^11.1.0"
+  }
+}

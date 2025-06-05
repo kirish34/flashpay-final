@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>USSD Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 220px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      font-size: 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>USSD Simulator</h2>
+  <input type="text" id="code" placeholder="Dial e.g. *123*615#" />
+  <button onclick="submit()">Dial</button>
+  <div id="result"></div>
+
+  <script>
+    async function submit() {
+      const input = document.getElementById('code').value.trim();
+      const match = input.match(/^\*\d+\*\d+#$/);
+      if (!match) {
+        document.getElementById('result').innerText = 'Invalid USSD format.';
+        return;
+      }
+
+      const ussdCode = input;
+      const phone = prompt("Enter customer phone number (e.g. 0722000000):");
+
+      if (!phone) {
+        document.getElementById('result').innerText = 'Phone number is required.';
+        return;
+      }
+
+      const res = await fetch('/flashpay/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ussdCode, phone }),
+      });
+
+      const data = await res.json();
+      document.getElementById('result').innerText = data.success
+        ? `✔️ STK push simulated for ${phone}`
+        : `❌ Error: ${data.message}`;
+    }
+  </script>
+</body>
+</html>

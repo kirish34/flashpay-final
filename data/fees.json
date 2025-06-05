@@ -1,0 +1,14 @@
+[
+  {
+    "matatu": "KCA 123A",
+    "amount": 300,
+    "timestamp": "2025-06-05T08:32:00.000Z",
+    "status": "paid"
+  },
+  {
+    "matatu": "KDA 456B",
+    "amount": 250,
+    "timestamp": "2025-06-05T09:45:00.000Z",
+    "status": "pending"
+  }
+]

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SACCO Admin Dashboard – TekeTeke</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      color: #1976d2;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 15px;
+      background: #1976d2;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .tab.active {
+      background: #135ba1;
+    }
+    .panel {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .panel.active {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background: #1976d2;
+      color: white;
+    }
+    .action-btns button {
+      margin-right: 5px;
+      padding: 5px 10px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>SACCO Admin Dashboard – TekeTeke</h2>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showPanel('saccos')">SACCOs</div>
+    <div class="tab" onclick="showPanel('matatus')">Matatus</div>
+    <div class="tab" onclick="showPanel('transactions')">Transactions</div>
+  </div>
+
+  <div id="saccos" class="panel active">
+    <h3>Register SACCO</h3>
+    <input type="text" id="saccoName" placeholder="SACCO Name">
+    <input type="text" id="saccoContact" placeholder="Contact Info">
+    <input type="text" id="saccoTill" placeholder="Till Number">
+    <button onclick="registerSacco()">Register SACCO</button>
+    <h3>All SACCOs</h3>
+    <table>
+      <thead><tr><th>Name</th><th>Contact</th><th>Till</th><th>Actions</th></tr></thead>
+      <tbody id="saccoList"></tbody>
+    </table>
+  </div>
+
+  <div id="matatus" class="panel">
+    <h3>Register Matatu</h3>
+    <input type="text" id="matatuPlate" placeholder="Plate Number">
+    <input type="text" id="matatuOwner" placeholder="Owner Name">
+    <input type="text" id="matatuContact" placeholder="Contact Info">
+    <input type="text" id="matatuType" placeholder="Vehicle Type">
+    <input type="text" id="matatuTLB" placeholder="TLB Number">
+    <input type="text" id="matatuTill" placeholder="Till Number">
+    <input type="text" id="matatuSacco" placeholder="SACCO Name">
+    <button onclick="registerMatatu()">Register Matatu</button>
+    <h3>All Matatus</h3>
+    <table>
+      <thead><tr><th>Plate</th><th>Owner</th><th>Contact</th><th>Type</th><th>TLB</th><th>Till</th><th>SACCO</th><th>Actions</th></tr></thead>
+      <tbody id="matatuList"></tbody>
+    </table>
+  </div>
+
+  <div id="transactions" class="panel">
+    <h3>Funds Received from SACCOs (Auto Fee Collection)</h3>
+    <button onclick="exportTableToCSV('fee-transactions.csv', 'transactionList')">Export</button>
+    <table>
+      <thead><tr><th>Date</th><th>SACCO</th><th>Amount</th><th>Matatu</th><th>Time</th></tr></thead>
+      <tbody id="transactionList"></tbody>
+    </table>
+
+    <h3>Funds Received for Loan Repayment (Auto Loan Collection)</h3>
+    <button onclick="exportTableToCSV('loan-transactions.csv', 'loanTransactionList')">Export</button>
+    <table>
+      <thead><tr><th>Date</th><th>SACCO</th><th>Amount</th><th>Matatu</th><th>Time</th></tr></thead>
+      <tbody id="loanTransactionList"></tbody>
+    </table>
+  </div>
+
+  <script>
+    function showPanel(id) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+    }
+
+    async function registerSacco() {
+      const name = document.getElementById("saccoName").value;
+      const contact = document.getElementById("saccoContact").value;
+      const till = document.getElementById("saccoTill").value;
+      const res = await fetch('/api/admin/register-sacco', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, contact, till })
+      });
+      const result = await res.json();
+      alert('✅ SACCO Registered');
+    }
+
+    async function registerMatatu() {
+      const plate = document.getElementById("matatuPlate").value;
+      const owner = document.getElementById("matatuOwner").value;
+      const contact = document.getElementById("matatuContact").value;
+      const type = document.getElementById("matatuType").value;
+      const tlb = document.getElementById("matatuTLB").value;
+      const till = document.getElementById("matatuTill").value;
+      const sacco = document.getElementById("matatuSacco").value;
+      const res = await fetch('/api/admin/register-matatu', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plate, owner, contact, type, tlb, till, sacco })
+      });
+      const result = await res.json();
+      alert('✅ Matatu Registered');
+    }
+
+    async function editSacco(id, name, contact, till) {
+      const newName = prompt("Edit SACCO name:", name);
+      const newContact = prompt("Edit contact info:", contact);
+      const newTill = prompt("Edit till number:", till);
+      if (!newName || !newContact || !newTill) return;
+      await fetch('/api/admin/update-sacco', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name: newName, contact: newContact, till: newTill })
+      });
+      alert('✅ SACCO updated');
+      location.reload();
+    }
+
+    async function deleteSacco(id) {
+      if (confirm("Are you sure you want to delete this SACCO?")) {
+        await fetch(`/api/admin/delete-sacco/${id}`, { method: 'DELETE' });
+        alert('🗑️ SACCO deleted');
+        location.reload();
+      }
+    }
+
+    async function editMatatu(id, matatu) {
+      const updated = {
+        plate: prompt("Plate Number:", matatu.plate),
+        owner: prompt("Owner Name:", matatu.owner),
+        contact: prompt("Contact Info:", matatu.contact),
+        type: prompt("Vehicle Type:", matatu.type),
+        tlb: prompt("TLB Number:", matatu.tlb),
+        till: prompt("Till Number:", matatu.till),
+        sacco: prompt("SACCO Name:", matatu.sacco),
+      };
+      if (!updated.plate || !updated.owner) return;
+      await fetch('/api/admin/update-matatu', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updated })
+      });
+      alert('✅ Matatu updated');
+      location.reload();
+    }
+
+    async function deleteMatatu(id) {
+      if (confirm("Delete this Matatu?")) {
+        await fetch(`/api/admin/delete-matatu/${id}`, { method: 'DELETE' });
+        alert('🗑️ Matatu deleted');
+        location.reload();
+      }
+    }
+
+    async function loadTransactions() {
+      const res1 = await fetch('/api/admin/transactions/fees');
+      const data1 = await res1.json();
+      const list1 = document.getElementById('transactionList');
+      list1.innerHTML = '';
+      data1.forEach(tx => {
+        const row = `<tr><td>${tx.date}</td><td>${tx.sacco}</td><td>${tx.amount}</td><td>${tx.matatu}</td><td>${tx.time}</td></tr>`;
+        list1.innerHTML += row;
+      });
+
+      const res2 = await fetch('/api/admin/transactions/loans');
+      const data2 = await res2.json();
+      const list2 = document.getElementById('loanTransactionList');
+      list2.innerHTML = '';
+      data2.forEach(tx => {
+        const row = `<tr><td>${tx.date}</td><td>${tx.sacco}</td><td>${tx.amount}</td><td>${tx.matatu}</td><td>${tx.time}</td></tr>`;
+        list2.innerHTML += row;
+      });
+    }
+
+    function exportTableToCSV(filename, tableId) {
+      const csv = [];
+      const rows = document.getElementById(tableId).closest('table').querySelectorAll('tr');
+      for (let row of rows) {
+        const cols = row.querySelectorAll('td, th');
+        const csvRow = [];
+        cols.forEach(col => csvRow.push('"' + col.innerText + '"'));
+        csv.push(csvRow.join(','));
+      }
+      const csvData = new Blob([csv.join('\n')], { type: 'text/csv' });
+      const tempLink = document.createElement('a');
+      tempLink.download = filename;
+      tempLink.href = window.URL.createObjectURL(csvData);
+      tempLink.style.display = 'none';
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+    }
+
+    loadTransactions();
+  </script>
+
+</body>
+</html>

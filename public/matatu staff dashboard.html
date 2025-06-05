@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matatu Staff Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f1f1f1;
+    }
+    h2 {
+      color: #1976d2;
+    }
+    section {
+      background: white;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background: #1976d2;
+      color: white;
+    }
+    .summary {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    @media (max-width: 600px) {
+      section, h2 {
+        padding: 10px;
+        font-size: 16px;
+      }
+      table, th, td {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>Matatu Staff Dashboard</h2>
+
+  <section>
+    <h3>📥 Payments Received via Till Number</h3>
+    <div class="summary">
+      Total Received Today: KES <span id="totalAmount">0</span><br>
+      Total Deducted (e.g. for fees/savings): KES <span id="deductedAmount">0</span>
+    </div>
+    <table id="paymentTable">
+      <thead>
+        <tr><th>Payer Name</th><th>Phone</th><th>Amount</th><th>Time</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script>
+    const tillNumber = localStorage.getItem('matatuTill');
+
+    function maskPhone(phone) {
+      if (!phone || phone.length < 10) return phone;
+      return phone.slice(0, 3) + '****' + phone.slice(7);
+    }
+
+    async function loadPayments() {
+      const res = await fetch(`/api/matatu/payments?till=${tillNumber}`);
+      const data = await res.json();
+      const tbody = document.getElementById('paymentTable').querySelector('tbody');
+      const totalAmountElem = document.getElementById('totalAmount');
+      const deductedAmountElem = document.getElementById('deductedAmount');
+
+      tbody.innerHTML = '';
+      let total = 0;
+      let deducted = 0;
+
+      data.forEach(p => {
+        const amount = Number(p.amount);
+        total += amount;
+        if (p.deducted) deducted += Number(p.deducted);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${p.name || '-'}</td>
+          <td>${maskPhone(p.phone)}</td>
+          <td>${amount}</td>
+          <td>${new Date(p.timestamp).toLocaleTimeString()}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      totalAmountElem.textContent = total.toLocaleString();
+      deductedAmountElem.textContent = deducted.toLocaleString();
+    }
+
+    loadPayments();
+    setInterval(loadPayments, 5000);
+  </script>
+</body>
+</html>
