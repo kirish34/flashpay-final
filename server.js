@@ -22,7 +22,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/api', require('./routes/admin-sacco'));
 
 // In-memory store (used temporarily for active M-PESA bills)
 global.activeBills = {};
@@ -47,17 +46,16 @@ async function loadJson(file) {
   require('./routes/login')(app);
   require('./routes/flashpay')(app);
   require('./routes/teketeke')(app);
-  require('./routes/pos')(app);
+  app.use('/api', require('./routes/pos'));
   require('./routes/admin')(app);
-  require('./routes/admin-sacco')(app);
-  require('./routes/sacco')(app);
-  require('./routes/matatu')(app);
+  app.use(require('./routes/admin-sacco'));
+  app.use('/api/sacco', require('./routes/sacco'));
+  app.use('/api/matatu', require('./routes/matatu'));
   require('./routes/callback')(app);
   require('./routes/status')(app);
   require('./routes/dashboard')(app);
   require('./routes/branches')(app);
   require('./routes/cashiers')(app);
-  require('./routes/teketeke-admin')(app);
 
   // Serve static login/dashboard routes
   app.get('/login', (_, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
