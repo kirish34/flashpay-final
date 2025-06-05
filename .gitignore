@@ -1,2 +1,5 @@
 data/firebase-key.json
 .env
+
+bfg-*.jar
+run-all.bat
